@@ -2,9 +2,9 @@
 import cats.effect.IO
 import io.circe.Json
 import org.http4s.{HttpRoutes, HttpService}
-import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
+import ShapesDerivation._
 
 
 object AccountRoutes{
@@ -22,34 +22,35 @@ object AccountRoutes{
 
       case req@POST -> Root / "account" =>
         req.decode[Account] { account =>
-          accountService.open(account.no,account.name).
+          accountService.open(account.no,account.name, account.accountType).
           flatMap {
                        case Left(message) => NotFound(errorBody(message))
                         case Right(_) => Ok()
                       }
         }
 
+
       case _@GET -> Root / "account" / no =>
         accountService.getMethod(no) flatMap {
           case Left(ex) => NotFound("account doesn't exist")
           case Right(acc) => Ok(acc)
         }
-      case req@PUT -> Root / "account" /"credit" / no=>
-        req.decode[Balance] { balance =>
-          accountService.credit(no,balance.amount).
-            flatMap {
-              case Left(message) => NotFound(errorBody(message))
-              case Right(_) => Ok()
-            }
-        }
-      case req@PUT -> Root / "account"/"debit" / no=>
-        req.decode[Balance] { balance =>
-          accountService.debit(no,balance.amount).
-            flatMap {
-              case Left(message) => NotFound(errorBody(message))
-              case Right(_) => Ok()
-            }
-        }
+//      case req@PUT -> Root / "account" /"credit" / no=>
+//        req.decode[Balance] { balance =>
+//          accountService.credit(no,balance.amount).
+//            flatMap {
+//              case Left(message) => NotFound(errorBody(message))
+//              case Right(_) => Ok()
+//            }
+//        }
+//      case req@PUT -> Root / "account"/"debit" / no=>
+//        req.decode[Balance] { balance =>
+//          accountService.debit(no,balance.amount).
+//            flatMap {
+//              case Left(message) => NotFound(errorBody(message))
+//              case Right(_) => Ok()
+//            }
+//        }
 
       //
       //      case req @ PUT -> Root / "books" / id =>
